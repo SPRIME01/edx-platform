@@ -12,7 +12,7 @@ from xmodule.modulestore.tests.factories import CourseFactory
 from xmodule.tests.xml import factories as xml
 from xmodule.tests.xml import XModuleXmlImportTest
 
-from courseware.courses import get_course_by_id, get_course, get_cms_course_link, course_image_url
+from courseware.courses import get_course_by_id, get_course, get_cms_course_link, get_cms_block_link, course_image_url
 from courseware.tests.tests import TEST_DATA_MONGO_MODULESTORE
 
 
@@ -61,6 +61,25 @@ class CoursesTest(ModuleStoreTestCase):
                 CMS_BASE_TEST
             ),
             get_cms_course_link(self.course)
+        )
+
+    @override_settings(
+        MODULESTORE=TEST_DATA_MONGO_MODULESTORE, CMS_BASE=CMS_BASE_TEST
+    )
+    def test_get_cms_block_link(self):
+        """
+        Tests that get_cms_block_link_by_id returns the right thing
+        """
+
+        self.course = CourseFactory.create(
+            org='org', number='num', display_name='name'
+        )
+
+        self.assertEqual(
+            u"//{}/course/org.num.name/branch/draft/block/name".format(
+                CMS_BASE_TEST
+            ),
+            get_cms_block_link(self.course, 'course')
         )
 
     @mock.patch(

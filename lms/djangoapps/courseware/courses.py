@@ -8,7 +8,7 @@ from django.http import Http404
 from django.conf import settings
 from .module_render import get_module
 from xmodule.course_module import CourseDescriptor
-from xmodule.modulestore import Location, XML_MODULESTORE_TYPE
+from xmodule.modulestore import Location, XML_MODULESTORE_TYPE, MONGO_MODULESTORE_TYPE
 from xmodule.modulestore.django import modulestore, loc_mapper
 from xmodule.contentstore.content import StaticContent
 from xmodule.modulestore.exceptions import ItemNotFoundError, InvalidLocationError
@@ -323,3 +323,26 @@ def get_cms_course_link(course):
         course.location.course_id, course.location, False, True
     )
     return "//" + settings.CMS_BASE + locator.url_reverse('course/', '')
+
+
+def get_cms_block_link(block, page):
+    """
+    Returns a link to block_index for editing the course in cms,
+    assuming that the block is actually cms-backed.
+    """
+    locator = loc_mapper().translate_location(
+        block.location.course_id, block.location, False, True
+    )
+    return "//" + settings.CMS_BASE + locator.url_reverse(page, '')
+
+
+def get_studio_url(course_id, page):
+    """
+    Get the Studio URL of the page that is passed in.
+    """
+    is_studio_course = (modulestore().get_modulestore_type(course_id) == MONGO_MODULESTORE_TYPE)
+    studio_link = None
+    if is_studio_course:
+        course = get_course_by_id(course_id)
+        studio_link = get_cms_block_link(course, page)
+    return studio_link
