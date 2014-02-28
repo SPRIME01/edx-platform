@@ -164,9 +164,15 @@ LANGUAGES = ENV_TOKENS.get('LANGUAGES', LANGUAGES)
 LANGUAGE_CODE = ENV_TOKENS.get('LANGUAGE_CODE', LANGUAGE_CODE)
 USE_I18N = ENV_TOKENS.get('USE_I18N', USE_I18N)
 
+# For consistency in user-experience, keep the value of this setting in sync with
+# the one in lms/envs/aws.py
+FEATURES['ENABLE_DISCUSSION_SERVICE'] = True
+
 ENV_FEATURES = ENV_TOKENS.get('FEATURES', ENV_TOKENS.get('MITX_FEATURES', {}))
 for feature, value in ENV_FEATURES.items():
     FEATURES[feature] = value
+
+WIKI_ENABLED = ENV_TOKENS.get('WIKI_ENABLED', WIKI_ENABLED)
 
 LOGGING = get_logger_config(LOG_DIR,
                             logging_env=ENV_TOKENS['LOGGING_ENV'],
