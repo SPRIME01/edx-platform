@@ -250,6 +250,15 @@ def students_update_enrollment(request, course_id):
 
     results = []
     for email in emails:
+        # Return an error if email isn't a plausibly valid email address
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            results.append({
+                'email': email,
+                'error': True,
+                'invalidEmail': True,
+            })
+            continue
+
         try:
             if action == 'enroll':
                 before, after = enroll_email(course_id, email, auto_enroll, email_students, email_params)
@@ -273,6 +282,7 @@ def students_update_enrollment(request, course_id):
             results.append({
                 'email': email,
                 'error': True,
+                'invalidEmail': False,
             })
 
     response_payload = {
