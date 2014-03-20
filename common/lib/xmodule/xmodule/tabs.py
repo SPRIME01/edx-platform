@@ -129,7 +129,7 @@ class CourseTab(object):  # pylint: disable=incomplete-protocol
         was implemented).
         """
 
-        if type(self) != type(other) and not self.validate(other, raise_error=False):
+        if type(other) is dict and not self.validate(other, raise_error=False):
             # 'other' is a dict-type tab and did not validate
             return False
 
@@ -137,7 +137,7 @@ class CourseTab(object):  # pylint: disable=incomplete-protocol
         name_is_eq = (other.get('name') is None or self.name == other['name'])
 
         # only compare the persisted/serialized members: 'type' and 'name'
-        return self.type == other['type'] and name_is_eq
+        return self.type == other.get('type') and name_is_eq
 
     def __ne__(self, other):
         """
@@ -180,7 +180,7 @@ class CourseTab(object):  # pylint: disable=incomplete-protocol
             'instructor': InstructorTab,  # not persisted
         }
 
-        tab_type = tab['type']
+        tab_type = tab.get('type')
         if tab_type not in sub_class_types:
             raise InvalidTabsException(
                 'Unknown tab type {0}. Known types: {1}'.format(tab_type, sub_class_types)
@@ -345,7 +345,7 @@ class LinkTab(CourseTab):
     def __eq__(self, other):
         if not super(LinkTab, self).__eq__(other):
             return False
-        return self.link_value == other['link']
+        return self.link_value == other.get('link')
 
     @classmethod
     def validate(cls, tab, raise_error=True):
@@ -420,7 +420,7 @@ class StaticTab(CourseTab):
     def __eq__(self, other):
         if not super(StaticTab, self).__eq__(other):
             return False
-        return self.url_slug == other['url_slug']
+        return self.url_slug == other.get('url_slug')
 
 
 class SingleTextbookTab(CourseTab):
@@ -709,11 +709,11 @@ class CourseTabList(List):
         if len(tabs) < 2:
             raise InvalidTabsException("Expected at least two tabs.  tabs: '{0}'".format(tabs))
 
-        if tabs[0]['type'] != CoursewareTab.type:
+        if tabs[0].get('type') != CoursewareTab.type:
             raise InvalidTabsException(
                 "Expected first tab to have type 'courseware'.  tabs: '{0}'".format(tabs))
 
-        if tabs[1]['type'] != CourseInfoTab.type:
+        if tabs[1].get('type') != CourseInfoTab.type:
             raise InvalidTabsException(
                 "Expected second tab to have type 'course_info'.  tabs: '{0}'".format(tabs))
 
@@ -733,7 +733,7 @@ class CourseTabList(List):
         """
         Check that the number of times that the given 'tab_type' appears in 'tabs' is less than or equal to 'max_num'.
         """
-        count = sum(1 for tab in tabs if tab['type'] == tab_type)
+        count = sum(1 for tab in tabs if tab.get('type') == tab_type)
         if count > max_num:
             raise InvalidTabsException(
                 "Tab of type '{0}' appears {1} time(s). Expected maximum of {2} time(s).".format(
