@@ -212,18 +212,24 @@ class TextbooksTestCase(TabTestCase):
             tabs.PDFTextbookTabs(),
             tabs.HtmlTextbookTabs(),
         ]
+        self.num_textbook_tabs = sum(1 for tab in self.course.tabs if isinstance(tab, tabs.TextbookTabsBase))
+        self.num_textbooks = self.num_textbook_tabs * len(books)
 
     def test_textbooks_enabled(self):
 
         type_to_reverse_name = {'textbook': 'book', 'pdftextbook': 'pdf_book', 'htmltextbook': 'html_book'}
 
         self.settings.FEATURES['ENABLE_TEXTBOOK'] = True
+        num_textbooks_found = 0
         for tab in tabs.CourseTabList.iterate_displayable(self.course, self.settings):
+            # verify all textbook type tabs
             if isinstance(tab, tabs.SingleTextbookTab):
                 book_type, book_index = tab.tab_id.split("/", 1)
                 expected_link = self.reverse(type_to_reverse_name[book_type], args=[self.course.id, book_index])
                 self.assertEqual(tab.link_func(self.course, self.reverse), expected_link)
                 self.assertTrue(tab.name.startswith('Book{0}:'.format(1 + int(book_index))))
+                num_textbooks_found = num_textbooks_found + 1
+        self.assertEquals(num_textbooks_found, self.num_textbooks)
 
     def test_textbooks_disabled(self):
 
@@ -348,7 +354,7 @@ class KeyCheckerTestCase(unittest.TestCase):
         self.assertTrue(tabs.key_checker(self.valid_keys)(self.dict_value, raise_error=False))
         self.assertFalse(tabs.key_checker(self.invalid_keys)(self.dict_value, raise_error=False))
         with self.assertRaises(tabs.InvalidTabsException):
-            tabs.key_checker(self.invalid_keys)(self.dict_value, raise_error=True)
+            tabs.key_checker(self.invalid_keys)(self.dict_value)
 
 
 class NeedNameTestCase(unittest.TestCase):
@@ -448,11 +454,6 @@ class ValidateTabsTestCase(unittest.TestCase):
 
 class CourseTabListTestCase(TabTestCase):
     """Testing the generator method for iterating through displayable tabs"""
-
-    def check_initialize_default(self, expected_tab):
-        self.course.tabs = []
-        tabs.CourseTabList.initialize_default(self.course)
-        self.assertTrue(expected_tab in self.course.tabs)
 
     def test_initialize_default_without_syllabus(self):
         self.course.tabs = []

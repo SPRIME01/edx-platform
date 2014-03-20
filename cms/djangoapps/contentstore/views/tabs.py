@@ -159,7 +159,7 @@ def primitive_delete(course, num):
 def primitive_insert(course, num, tab_type, name):
     "Inserts a new tab at the given number (0 based)."
     validate_args(num, tab_type)
-    new_tab = CourseTab.factory({u'type': unicode(tab_type), u'name': unicode(name)})
+    new_tab = CourseTab.from_dict({u'type': unicode(tab_type), u'name': unicode(name)})
     tabs = course.tabs
     tabs.insert(num, new_tab)
     modulestore('direct').update_item(course, '**replace_user**')
