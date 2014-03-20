@@ -563,8 +563,8 @@ class SyllabusTab(CourseTab):
         return hasattr(course, 'syllabus_present') and course.syllabus_present
 
     def __init__(self, tab=None):  # pylint: disable=unused-argument
+        # Translators: "Syllabus" appears on a tab that, when clicked, opens the syllabus of the course.
         super(SyllabusTab, self).__init__(
-            # Translators: "Syllabus" appears on a tab that, when clicked, opens the syllabus of the course.
             name=_('Syllabus'),
             tab_id=self.type,
             link_func=link_reverse_func(self.type),
